@@ -1,3 +1,5 @@
+from model import llm
+
 def main():
     print("Hello from vendai!")
 
