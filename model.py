@@ -1,4 +1,6 @@
+import os
 from typing import List
+from dotenv import load_dotenv
 
 from langchain.messages import AIMessage, SystemMessage
 from langchain.tools import tool
@@ -6,12 +8,18 @@ from langchain_ollama import ChatOllama
 
 from vend import VendingMachine, Item
 
+load_dotenv()
+model_name = os.getenv("MODEL")
+
 vending_machine = VendingMachine(balance=100)
 
 items = [
     Item(name="Coke", price=1.50),
     Item(name="Pepsi", price=1.50),
-    Item(name="Water", price=1.00)]
+    Item(name="Water", price=1.00),
+    Item(name="Chips", price=2.00),
+    Item(name="Candy", price=1.00),
+    ]
 
 
 @tool
@@ -45,17 +53,23 @@ def restock(item_name: str, purchase_price: float, selling_price: float, quantit
 @tool
 def check_stock() -> str:
     """
-    Check the current stock of the vending machine.
+    Check the current stock of the vending machine and current balance.
 
     Returns:
-        str: A string representation of the current stock and sale prices.
+        str: A string representation of the current stock, sale prices, and balance.
     """
-    return vending_machine.display_stock()
+    stock = vending_machine.display_stock()
+    balance = vending_machine.check_balance()
+    return f"{stock}\nCurrent Balance: ${balance}"
+
     
 for item in items:
-    restock(item.name, item.price, item.price * 1.5, 4)
+    for _ in range(3):
+        vending_machine.add_item(item)
+    vending_machine.set_sale_price(item.name, item.price + 0.50)
+
     
 
 llm = ChatOllama(
-    model="gemma3:4b"
+    model=model_name
 ).bind_tools([restock, check_stock])
