@@ -29,7 +29,13 @@ class VendingMachine:
             self.sale_prices[item_name] = price
         else:
             raise ValueError(f"Cannot set sale price for {item_name} as it does not exist in the vending machine.")
-        
+    
+    def get_item_price(self, item_name: str):
+        if item_name in self.sale_prices:
+            return self.sale_prices[item_name]
+        else:
+            raise ValueError(f"Sale price for {item_name} is not set.")
+
     def sell_item(self, item_name: str):
         if item_name in self.items and self.items[item_name] > 0:
             self.items[item_name] -= 1
